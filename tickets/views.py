@@ -1,4 +1,5 @@
 from rest_framework import generics
+from rest_framework.permissions import AllowAny
 from .serializers import UserSignupSerializer
 
 from .models import Project
@@ -19,4 +20,5 @@ class ProjectDetail(generics.RetrieveUpdateDestroyAPIView):
 
 
 class RegisterView(generics.CreateAPIView):
+    permission_classes = [AllowAny]
     serializer_class = UserSignupSerializer
