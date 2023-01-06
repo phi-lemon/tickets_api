@@ -8,16 +8,36 @@ def get_sentinel_user():
 
 
 class Project(models.Model):
-    project_id = models.IntegerField
+    # project_id = models.IntegerField
     title = models.CharField(max_length=128)
-    description = models.CharField(max_length=255)
-    type = models.CharField(max_length=128)
-    contributor_user_id = models.ForeignKey('Contributor', on_delete=models.PROTECT)
+    description = models.CharField(max_length=2048)
+
+    # types
+    BACKEND = 'B'
+    FRONTEND = 'F'
+    IOS = 'I'
+    ANDROID = 'A'
+    TYPE_CHOICES = [
+        (BACKEND, 'Backend'),
+        (FRONTEND, 'Frontend'),
+        (IOS, 'Ios'),
+        (ANDROID, 'Android'),
+    ]
+    type = models.CharField(
+        max_length=1,
+        choices=TYPE_CHOICES,
+        default=None,
+    )
+
+    author = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='project_author', on_delete=models.PROTECT)
+
+    def __str__(self):
+        return self.title
 
 
 class Contributor(models.Model):
-    user_id = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT)
-    project_id = models.ForeignKey(Project, on_delete=models.PROTECT)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='contributor', on_delete=models.PROTECT)
+    project = models.ForeignKey(Project, on_delete=models.CASCADE)
 
     # permissions
     READ = 'R'
@@ -42,14 +62,30 @@ class Contributor(models.Model):
     role = models.CharField(
         max_length=1,
         choices=ROLE_CHOICES,
-        default=READ,
+        default=AUTHOR,
     )
+
+    def __str__(self):
+        return str(self.user) + " - " + str(self.project)
 
 
 class Issue(models.Model):
     title = models.CharField(max_length=128)
-    desc = models.CharField(max_length=255)
-    tag = models.CharField(max_length=50)
+    desc = models.CharField(max_length=2048)
+    # tag
+    BUG = 'B'
+    EVOLUTION = 'E'
+    TASK = 'T'
+    TAG_CHOICES = [
+        (BUG, 'Bug'),
+        (EVOLUTION, 'Evolution'),
+        (TASK, 'Task'),
+    ]
+    tag = models.CharField(
+        max_length=1,
+        choices=TAG_CHOICES,
+        default=TASK,
+    )
     # priority
     HIGH = 'H'
     MEDIUM = 'M'
@@ -64,24 +100,33 @@ class Issue(models.Model):
         choices=PRIORITY_CHOICES,
         default=LOW,
     )
-    project_id = models.ForeignKey(to=Project, on_delete=models.CASCADE)
+    project = models.ForeignKey(to=Project, on_delete=models.CASCADE)
     # status
-    OPEN = 'O'
+    TODO = 'T'
+    IN_PROGRESS = 'I'
     CLOSED = 'C'
     STATUS_CHOICES = [
-        (OPEN, 'Open'),
+        (TODO, 'Todo'),
+        (IN_PROGRESS, 'In progress'),
         (CLOSED, 'Closed'),
     ]
     status = models.CharField(
         max_length=1,
         choices=STATUS_CHOICES,
-        default=OPEN,
+        default=TODO,
     )
-    author_user_id = models.OneToOneField(settings.AUTH_USER_MODEL, related_name='author',
-                                          on_delete=models.SET(get_sentinel_user))
-    assignee_user_id = models.OneToOneField(settings.AUTH_USER_MODEL, related_name='assignee',
-                                            on_delete=models.SET(get_sentinel_user))
+    author = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='issue_author',
+                               on_delete=models.SET(get_sentinel_user))
+    assignee = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='issue_assignee',
+                                 on_delete=models.SET(get_sentinel_user))
     created_time = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return self.title
+
+
+class Comment(models.Model):
+    description = models.CharField(max_length=2048)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='comment_author', on_delete=models.CASCADE)
+    issue = models.ForeignKey(Issue, on_delete=models.CASCADE)
+    created_time = models.DateTimeField(auto_now_add=True)
