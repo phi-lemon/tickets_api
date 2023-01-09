@@ -17,16 +17,16 @@ class ProjectSerializer(serializers.ModelSerializer):
         model = Project
 
 
-class UserSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = get_user_model()
-        fields = ("id", "username",)
+# class UserSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = get_user_model()
+#         fields = ("id", "username",)
 
 
 class UserSignupSerializer(serializers.ModelSerializer):
     class Meta:
         model = get_user_model()
-        fields = ["id", "username", "email", "password"]
+        fields = ["id", "email", "password", "first_name", "last_name"]
         extra_kwargs = {'password': {'write_only': True}}
 
     def validate_password(self, value):
@@ -37,9 +37,7 @@ class UserSignupSerializer(serializers.ModelSerializer):
         return value
 
     def create(self, validated_data):
-        user = get_user_model().objects.create(email=validated_data['email'],
-                                               username=validated_data['username']
-                                               )
+        user = get_user_model().objects.create(email=validated_data['email'])
         user.set_password(validated_data['password'])
         user.save()
         return user
