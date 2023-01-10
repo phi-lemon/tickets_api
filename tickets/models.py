@@ -62,7 +62,7 @@ class Contributor(models.Model):
     role = models.CharField(
         max_length=1,
         choices=ROLE_CHOICES,
-        default=AUTHOR,
+        default=CONTRIBUTOR,
     )
 
     class Meta:

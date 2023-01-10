@@ -3,38 +3,36 @@ from rest_framework.permissions import AllowAny
 
 from .serializers import UserSignupSerializer
 from .models import Project
-from .permissions import IsContributor
+from .permissions import IsAuthorOrContributor
 from .serializers import ProjectSerializer
 
 
 class ProjectList(generics.ListCreateAPIView):
-    permission_classes = (IsContributor,)
+    permission_classes = (IsAuthorOrContributor,)
 
     def get_queryset(self):
         """
         List projects where authenticated user is author or contributor
-        :return:
         """
         user = self.request.user
-        projects = Project.objects.filter(contributor__user_id=user.id) | Project.objects.filter(author=user)
+        query_contributor = user.contributor.all()
+        projects = Project.objects.filter(author=user) | Project.objects.filter(contributor__in=query_contributor)
         return projects.distinct()
 
     serializer_class = ProjectSerializer
 
 
 class ProjectDetail(generics.RetrieveUpdateDestroyAPIView):
-    permission_classes = (IsContributor,)
+    permission_classes = (IsAuthorOrContributor,)
 
-    queryset = Project.objects.all()
-
-    # def get_queryset(self):
-    #     """
-    #     List projects where authenticated user is author or contributor
-    #     :return:
-    #     """
-    #     user = self.request.user
-    #     projects = Project.objects.filter(contributor__user_id=user.id) | Project.objects.filter(author=user)
-    #     return projects.distinct()
+    def get_queryset(self):
+        """
+        List projects where authenticated user is author or contributor
+        """
+        user = self.request.user
+        query_contributor = user.contributor.all()
+        projects = Project.objects.filter(author=user) | Project.objects.filter(contributor__in=query_contributor)
+        return projects.distinct()
 
     serializer_class = ProjectSerializer
 

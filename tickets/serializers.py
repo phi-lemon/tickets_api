@@ -6,6 +6,8 @@ from .models import Project
 
 
 class ProjectSerializer(serializers.ModelSerializer):
+    author = serializers.StringRelatedField()
+
     class Meta:
         fields = (
             "id",
