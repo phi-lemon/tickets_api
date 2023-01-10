@@ -8,7 +8,6 @@ def get_sentinel_user():
 
 
 class Project(models.Model):
-    # project_id = models.IntegerField
     title = models.CharField(max_length=128)
     description = models.CharField(max_length=2048)
 
@@ -29,14 +28,15 @@ class Project(models.Model):
         default=None,
     )
 
-    author = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='project_author', on_delete=models.PROTECT)
+    author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, null=True)
+    contributors = models.ManyToManyField(settings.AUTH_USER_MODEL, through='Contributor', related_name='contributors')
 
     def __str__(self):
         return self.title
 
 
 class Contributor(models.Model):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='contributor', on_delete=models.PROTECT)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='contributor', on_delete=models.CASCADE)
     project = models.ForeignKey(Project, on_delete=models.CASCADE)
 
     # permissions
@@ -64,6 +64,9 @@ class Contributor(models.Model):
         choices=ROLE_CHOICES,
         default=AUTHOR,
     )
+
+    class Meta:
+        unique_together = ('user', 'project')
 
     def __str__(self):
         return str(self.user) + " - " + str(self.project)
