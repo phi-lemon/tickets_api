@@ -49,14 +49,14 @@ class Contributor(models.Model):
     permission = models.CharField(
         max_length=1,
         choices=PERMISSION_CHOICES,
-        default=READ,
+        default=WRITE,
     )
 
     # roles
-    AUTHOR = 'A'
+    MANAGER = 'M'
     CONTRIBUTOR = 'C'
     ROLE_CHOICES = [
-        (AUTHOR, 'Author'),
+        (MANAGER, 'Manager'),
         (CONTRIBUTOR, 'Contributor'),
     ]
     role = models.CharField(
