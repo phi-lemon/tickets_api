@@ -3,8 +3,9 @@ from django.contrib import admin
 from .models import Project, Contributor, Issue, Comment
 
 
-admin_models = [Issue, Comment]
-admin.site.register(admin_models)
+class ContributorInline(admin.TabularInline):
+    model = Contributor
+    extra = 1
 
 
 class ContributorAdmin(admin.ModelAdmin):
@@ -12,8 +13,13 @@ class ContributorAdmin(admin.ModelAdmin):
 
 
 class ProjectAdmin(admin.ModelAdmin):
-    list_display = ('id', 'title')
+    list_display = ('id', 'title', 'author')
+    inlines = (ContributorInline,)
 
 
 admin.site.register(Project, ProjectAdmin)
 admin.site.register(Contributor, ContributorAdmin)
+
+admin_models = [Issue, Comment]
+admin.site.register(admin_models)
+
