@@ -2,7 +2,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth import password_validation
 from rest_framework import serializers
 
-from .models import Project
+from .models import Project, Contributor
 
 
 class ProjectSerializer(serializers.ModelSerializer):
@@ -19,10 +19,12 @@ class ProjectSerializer(serializers.ModelSerializer):
         model = Project
 
 
-# class UserSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = get_user_model()
-#         fields = ("id", "username",)
+class UserSerializer(serializers.ModelSerializer):
+    user = serializers.StringRelatedField()
+
+    class Meta:
+        model = Contributor
+        fields = ("id", "user",)
 
 
 class UserSignupSerializer(serializers.ModelSerializer):

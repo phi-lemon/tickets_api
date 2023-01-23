@@ -34,6 +34,17 @@ class Project(models.Model):
     def __str__(self):
         return self.title
 
+    def save(self, *args, **kwargs):
+        """
+        Add author as a contributor, only if not already created (only for project creation, NOT if update)
+        """
+        super().save(*args, **kwargs)
+
+        auth_as_cont, created = Contributor.objects.get_or_create(
+            user=self.author,
+            project=self
+        )
+
 
 class Contributor(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='contributor', on_delete=models.CASCADE)
