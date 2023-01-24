@@ -36,7 +36,7 @@ class Project(models.Model):
 
     def save(self, *args, **kwargs):
         """
-        Add author as a contributor, only if not already created (only for project creation, NOT if update)
+        Add author as a contributor, only if not already created (NOT if update)
         """
         super().save(*args, **kwargs)
 

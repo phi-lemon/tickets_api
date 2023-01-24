@@ -1,5 +1,6 @@
 from django.contrib.auth import get_user_model
 from django.contrib.auth import password_validation
+
 from rest_framework import serializers
 
 from .models import Project, Contributor
@@ -9,6 +10,7 @@ class ProjectSerializer(serializers.ModelSerializer):
     author = serializers.StringRelatedField()
 
     class Meta:
+        model = Project
         fields = (
             "id",
             "title",
@@ -16,15 +18,33 @@ class ProjectSerializer(serializers.ModelSerializer):
             "type",
             "author",
         )
-        model = Project
+
+    def create(self, validated_data):
+        author = self.context['request'].user
+        project = Project.objects.create(
+            title=validated_data["title"],
+            description=validated_data["description"],
+            type=validated_data["type"],
+            author=author,
+        )
+        project.save()
+        return project
 
 
-class UserSerializer(serializers.ModelSerializer):
+class UsersListSerializer(serializers.ModelSerializer):
     user = serializers.StringRelatedField()
 
     class Meta:
         model = Contributor
-        fields = ("id", "user",)
+        fields = ('user',)
+
+
+class UsersCreateSerializer(serializers.ModelSerializer):
+    project = serializers.StringRelatedField()  # readonly
+
+    class Meta:
+        model = Contributor
+        fields = ('user', 'project')
 
 
 class UserSignupSerializer(serializers.ModelSerializer):
