@@ -12,22 +12,21 @@ class IsAuthorOrReadOnly(permissions.BasePermission):
         return False
 
     def has_object_permission(self, request, view, obj):
-        print('obj: ', obj)
         if request.method in permissions.SAFE_METHODS:  # read permissions
             return True
         return obj.author == request.user
 
 
-class IsProjectContributor(permissions.BasePermission):
+class IsProjectContributorOrAuthor(permissions.BasePermission):
 
-    def has_permission(self, request, view):
-        if request.user.is_authenticated:
-            project = get_object_or_404(Project, pk=view.kwargs["project_pk"])
+    def has_permission(self, request, view):  # list view
+        project = get_object_or_404(Project, pk=view.kwargs["project_pk"])
+        if request.user.is_authenticated and request.method in permissions.SAFE_METHODS:
             return project.contributors.contains(request.user)
-        return False
+        return project.author == request.user  # only author has write permissions
 
-    def has_object_permission(self, request, view, obj):
-        return False
+    def has_object_permission(self, request, view, obj):  # list and detail view
+        return False  # Not used
 
 
 class IsContributorOrReadOnly(permissions.BasePermission):
