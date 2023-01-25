@@ -31,7 +31,7 @@ class ProjectSerializer(serializers.ModelSerializer):
         return project
 
 
-class UsersListSerializer(serializers.ModelSerializer):
+class ContributorListSerializer(serializers.ModelSerializer):
     user = serializers.StringRelatedField()
 
     class Meta:
@@ -39,12 +39,20 @@ class UsersListSerializer(serializers.ModelSerializer):
         fields = ('user',)
 
 
-class UsersCreateSerializer(serializers.ModelSerializer):
-    project = serializers.StringRelatedField()  # readonly
+class ContributorCreateSerializer(serializers.ModelSerializer):
+    project = serializers.StringRelatedField()
 
     class Meta:
         model = Contributor
         fields = ('user', 'project')
+        read_only_fields = ('project',)
+
+    def create(self, validated_data):
+        project = Project.objects.get(id=self.context['view'].kwargs['project_pk'])
+        contributors = Contributor.objects.create(
+            user=validated_data["user"], project_id=project.pk
+        )
+        return contributors
 
 
 class UserSignupSerializer(serializers.ModelSerializer):
