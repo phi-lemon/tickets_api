@@ -3,7 +3,7 @@ from django.contrib.auth import password_validation
 
 from rest_framework import serializers
 
-from .models import Project, Contributor
+from .models import Project, Contributor, Issue
 
 
 class ProjectSerializer(serializers.ModelSerializer):
@@ -11,48 +11,28 @@ class ProjectSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Project
-        fields = (
-            "id",
-            "title",
-            "description",
-            "type",
-            "author",
-        )
-
-    def create(self, validated_data):
-        author = self.context['request'].user
-        project = Project.objects.create(
-            title=validated_data["title"],
-            description=validated_data["description"],
-            type=validated_data["type"],
-            author=author,
-        )
-        project.save()
-        return project
+        fields = '__all__'
 
 
-class ContributorListSerializer(serializers.ModelSerializer):
-    user = serializers.StringRelatedField()
+class ContributorSerializer(serializers.ModelSerializer):
+    user = serializers.SlugRelatedField(
+        slug_field='email',
+        queryset=get_user_model().objects.all()
+     )
 
     class Meta:
         model = Contributor
-        fields = ('user',)
+        fields = ('id', 'user')
 
 
-class ContributorCreateSerializer(serializers.ModelSerializer):
+class IssueSerializer(serializers.ModelSerializer):
+    author = serializers.StringRelatedField()
     project = serializers.StringRelatedField()
 
     class Meta:
-        model = Contributor
-        fields = ('user', 'project')
+        model = Issue
+        fields = '__all__'
         read_only_fields = ('project',)
-
-    def create(self, validated_data):
-        project = Project.objects.get(id=self.context['view'].kwargs['project_pk'])
-        contributors = Contributor.objects.create(
-            user=validated_data["user"], project_id=project.pk
-        )
-        return contributors
 
 
 class UserSignupSerializer(serializers.ModelSerializer):

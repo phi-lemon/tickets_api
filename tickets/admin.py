@@ -17,9 +17,12 @@ class ProjectAdmin(admin.ModelAdmin):
     inlines = (ContributorInline,)
 
 
+class IssueAdmin(admin.ModelAdmin):
+    list_display = ('title', 'project', 'author', 'assignee')
+
+
 admin.site.register(Project, ProjectAdmin)
 admin.site.register(Contributor, ContributorAdmin)
-
-admin_models = [Issue, Comment]
-admin.site.register(admin_models)
+admin.site.register(Issue, IssueAdmin)
+admin.site.register(Comment)
 
