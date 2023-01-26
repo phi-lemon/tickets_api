@@ -3,9 +3,10 @@ from rest_framework import viewsets
 from rest_framework.permissions import AllowAny
 
 from .permissions import IsAuthenticated, IsAuthorOrReadOnly, IsProjectAuthorOrContributorReadOnly, \
-    IsIssueAuthorOrContributorReadOnly
-from .serializers import UserSignupSerializer, ProjectSerializer, ContributorSerializer, IssueSerializer
-from .models import Project, Contributor, Issue
+    IsIssueCommentContributor
+from .serializers import UserSignupSerializer, ProjectSerializer, ContributorSerializer, IssueSerializer, \
+    CommentSerializer
+from .models import Project, Contributor, Issue, Comment
 
 
 class ProjectViewSet(viewsets.ModelViewSet):
@@ -30,7 +31,7 @@ class ProjectViewSet(viewsets.ModelViewSet):
 
 
 class IssueViewSet(viewsets.ModelViewSet):
-    permission_classes = (IsAuthenticated, IsIssueAuthorOrContributorReadOnly)
+    permission_classes = (IsAuthenticated, IsIssueCommentContributor)
     serializer_class = IssueSerializer
 
     def get_queryset(self):
@@ -49,15 +50,29 @@ class IssueViewSet(viewsets.ModelViewSet):
         serializer.save(author=author, project=project)
 
 
+class CommentViewSet(viewsets.ModelViewSet):
+    permission_classes = (IsAuthenticated, IsIssueCommentContributor)
+    serializer_class = CommentSerializer
+
+    def get_queryset(self):
+        """
+        List issue's comments
+        """
+        comments = Comment.objects.filter(issue=self.kwargs['issue_pk'])
+        return comments
+
+    def perform_create(self, serializer):
+        """
+        setting implicite attributes
+        """
+        user = self.request.user
+        issue = Issue.objects.get(id=self.kwargs['issue_pk'])
+        serializer.save(user=user, issue=issue)
+
+
 class UserViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated, IsProjectAuthorOrContributorReadOnly)
     serializer_class = ContributorSerializer
-
-    # def get_serializer_class(self):
-    #     if self.request.method == 'GET':
-    #         return ContributorListSerializer
-    #     else:
-    #         return ContributorCreateSerializer
 
     def get_queryset(self, *args, **kwargs):
         contributors = Contributor.objects.filter(project_id=self.kwargs['project_pk'])
@@ -69,15 +84,6 @@ class UserViewSet(viewsets.ModelViewSet):
         """
         project = Project.objects.get(id=self.kwargs['project_pk'])
         serializer.save(project=project)
-
-
-    # def create(self, validated_data):
-    #     project = Project.objects.get(id=self.context['view'].kwargs['project_pk'])
-    #     contributor = Contributor.objects.create(
-    #         user=validated_data["user"],
-    #         project_id=project.pk
-    #     )
-    #     return contributor
 
 
 class RegisterView(generics.CreateAPIView):

@@ -3,11 +3,12 @@ from django.contrib.auth import password_validation
 
 from rest_framework import serializers
 
-from .models import Project, Contributor, Issue
+from .models import Project, Contributor, Issue, Comment
 
 
 class ProjectSerializer(serializers.ModelSerializer):
     author = serializers.StringRelatedField()
+    contributors = serializers.StringRelatedField(many=True, read_only=True)
 
     class Meta:
         model = Project
@@ -28,11 +29,26 @@ class ContributorSerializer(serializers.ModelSerializer):
 class IssueSerializer(serializers.ModelSerializer):
     author = serializers.StringRelatedField()
     project = serializers.StringRelatedField()
+    assignee = serializers.SlugRelatedField(
+        slug_field='email',
+        queryset=get_user_model().objects.all()
+     )
 
     class Meta:
         model = Issue
         fields = '__all__'
-        read_only_fields = ('project',)
+
+
+class CommentSerializer(serializers.ModelSerializer):
+    user = serializers.StringRelatedField()
+    issue = serializers.SlugRelatedField(
+        slug_field='title',
+        read_only=True
+     )
+
+    class Meta:
+        model = Comment
+        fields = '__all__'
 
 
 class UserSignupSerializer(serializers.ModelSerializer):

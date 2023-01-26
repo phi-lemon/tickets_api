@@ -1,7 +1,7 @@
 from django.shortcuts import get_object_or_404
 from rest_framework import permissions
 
-from .models import Contributor, Project
+from .models import Project, Comment, Issue
 
 
 class IsAuthenticated(permissions.BasePermission):
@@ -22,7 +22,7 @@ class IsAuthorOrReadOnly(permissions.BasePermission):
     """
 
     def has_object_permission(self, request, view, obj):
-        # not applied when creating objects
+        # not applied when creating objects (post)
         # See https://www.django-rest-framework.org/api-guide/permissions/#limitations-of-object-level-permissions
         if request.method in permissions.SAFE_METHODS:  # read permissions
             return True
@@ -43,7 +43,7 @@ class IsProjectAuthorOrContributorReadOnly(permissions.BasePermission):
         return project.author == request.user  # only author has write permissions
 
 
-class IsIssueAuthorOrContributorReadOnly(permissions.BasePermission):
+class IsIssueCommentContributor(permissions.BasePermission):
     """
     Get, Post: restricted to contributors (author is contributor)
     Update, Delete: must be author or assignee
@@ -54,17 +54,7 @@ class IsIssueAuthorOrContributorReadOnly(permissions.BasePermission):
         return project.contributors.contains(request.user)
 
     def has_object_permission(self, request, view, obj):
-        return obj.author == request.user or obj.assignee == request.user
-
-
-# class IsContributorOrReadOnly(permissions.BasePermission):
-#
-#     def has_permission(self, request, view):  # list view
-#         if request.user.is_authenticated:
-#             return True
-#         return False
-#
-#     def has_object_permission(self, request, view, obj):  # list and detail view
-#         if request.method in permissions.SAFE_METHODS:  # read permissions only
-#             return True
-#         return Contributor.objects.filter(user=request.user, project=obj).exists()
+        if isinstance(obj, Issue):
+            return obj.author == request.user or obj.assignee == request.user
+        elif isinstance(obj, Comment):
+            return obj.user == request.user
