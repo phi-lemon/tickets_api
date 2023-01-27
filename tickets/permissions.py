@@ -46,7 +46,7 @@ class IsProjectAuthorOrContributorReadOnly(permissions.BasePermission):
 class IsIssueCommentContributor(permissions.BasePermission):
     """
     Get, Post: restricted to contributors (author is contributor)
-    Update, Delete: must be author or assignee
+    Update, Delete: must be author
     """
 
     def has_permission(self, request, view):
@@ -55,6 +55,6 @@ class IsIssueCommentContributor(permissions.BasePermission):
 
     def has_object_permission(self, request, view, obj):
         if isinstance(obj, Issue):
-            return obj.author == request.user or obj.assignee == request.user
+            return obj.author == request.user
         elif isinstance(obj, Comment):
             return obj.user == request.user

@@ -21,8 +21,12 @@ class IssueAdmin(admin.ModelAdmin):
     list_display = ('title', 'project', 'author', 'assignee')
 
 
+class CommentAdmin(admin.ModelAdmin):
+    list_display = ('issue', 'description', 'user')
+
+
 admin.site.register(Project, ProjectAdmin)
 admin.site.register(Contributor, ContributorAdmin)
 admin.site.register(Issue, IssueAdmin)
-admin.site.register(Comment)
+admin.site.register(Comment, CommentAdmin)
 

@@ -26,6 +26,7 @@ class Project(models.Model):
         max_length=1,
         choices=TYPE_CHOICES,
         default=None,
+        null=True
     )
 
     author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, null=True)
@@ -84,6 +85,7 @@ class Contributor(models.Model):
 
 
 class Issue(models.Model):
+
     title = models.CharField(max_length=128)
     desc = models.CharField(max_length=2048)
     # tag

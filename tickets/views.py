@@ -75,6 +75,9 @@ class UserViewSet(viewsets.ModelViewSet):
     serializer_class = ContributorSerializer
 
     def get_queryset(self, *args, **kwargs):
+        """
+        List project's contributors
+        """
         contributors = Contributor.objects.filter(project_id=self.kwargs['project_pk'])
         return contributors
 
