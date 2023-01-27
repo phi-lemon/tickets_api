@@ -27,6 +27,11 @@ you may need to authorize scripts execution : `Set-ExecutionPolicy -ExecutionPol
 pip install -r requirements.txt
 ```
 
+### Create the database
+```bash
+python manage.py migrate
+```
+
 ## Usage
 
 ### Launch Server
@@ -40,7 +45,7 @@ python manage.py runserver
 Your may use your browser to request the browsable API provided by Django Rest Framework, or use a client like Postman. 
 <br>Registration : http://127.0.0.1:8000/api/signup/
 
-### Documentation
+### Documentation of all API endpoints
 https://documenter.getpostman.com/view/24886844/2s8ZDeTyNq
 
 ## License
